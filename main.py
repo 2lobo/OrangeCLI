@@ -207,6 +207,8 @@ def log_mining_stats(network, total_txs):
 def mine(network, tpm, fee):
     global pending_txs
     client = get_client(network)
+    miner_info = client.account_info(miner_address)
+    miner_balance = max(0, miner_info["amount"] - miner_info["min-balance"])
     started = int(time.time())
     started = started - started % 60
     transactions_to_send = tpm
@@ -224,7 +226,7 @@ def mine(network, tpm, fee):
         time.sleep(5)
         now = int(time.time())
     click.echo("Mining starts...")
-    while True:
+    while miner_balance>2000000:
         now = int(time.time())
         now = now - now % 60
         if started != now:
@@ -251,6 +253,8 @@ def mine(network, tpm, fee):
         transactions_to_send -= total
         loops += 1
         time.sleep(2.0 - ((time.monotonic() - starttime) % 2.0))
+        miner_info = client.account_info(miner_address)
+        miner_balance = max(0, miner_info["amount"] - miner_info["min-balance"])
 
 
 @click.command()
